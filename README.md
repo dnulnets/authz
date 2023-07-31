@@ -10,7 +10,11 @@ This project creates a standalone authorization server that uses Keycloaks autho
 * Istio 1.17.2
 * Quarkus 3.2.0
 
-## Things that needs to be done
+## Things on the list
+* Caching of resource/URI mapping instead of asking Keycloak for every request.
+* Error handling when a request fails for reasons such as Keycloak not respondning/down, not authroized JWT etc.
+* This README with examples for setup etc.
+* Performance tuning and deployment scenarios.
 
 ### Setup in kubernetes
 ### Setup in keycloak
