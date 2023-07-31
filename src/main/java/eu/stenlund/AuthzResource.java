@@ -14,6 +14,7 @@ import jakarta.ws.rs.core.UriInfo;
 import org.jboss.resteasy.reactive.RestResponse;
 import org.jboss.resteasy.reactive.RestResponse.ResponseBuilder;
 import org.jboss.resteasy.reactive.RestResponse.Status;
+import org.eclipse.microprofile.config.ConfigProvider;
 import org.jboss.logging.Logger;
 import org.jboss.resteasy.reactive.RestHeader;
 import org.keycloak.authorization.client.AuthorizationDeniedException;
@@ -23,6 +24,9 @@ import org.keycloak.representations.idm.authorization.AuthorizationRequest;
 import org.keycloak.representations.idm.authorization.AuthorizationResponse;
 import org.keycloak.representations.idm.authorization.ResourceRepresentation;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.util.List;
 
 @Path("/")
@@ -37,10 +41,20 @@ public class AuthzResource {
 
     public AuthzResource() {
 
+        String keycloak = ConfigProvider.getConfig().getValue("authz.keycloak", String.class);
+        
         /* Create the clients */
-        authzClient = AuthzClient.create();
-        if (authzClient != null)
-            resourceClient = authzClient.protection().resource();
+        try {
+            InputStream input = new FileInputStream(keycloak);
+            authzClient = AuthzClient.create (input);
+            if (authzClient != null)
+                resourceClient = authzClient.protection().resource();
+        } catch (FileNotFoundException fe) {
+            log.error ("AUTHZ: Cannot locate keycloak configuration file: " + keycloak);
+        } catch (RuntimeException re)
+        {
+            log.error ("AUTHZ: " + re.getLocalizedMessage());
+        }
     }
 
     /* Take out the JWT from the Bearer, if any */
