@@ -1,5 +1,5 @@
 # Istio external authorization for Keycloak
-This project creates a standalone authorization server that uses Keycloaks authorization services for fine grained authroization. It is deployed in kubernetes and used by a CUSTOM action in an istio authorization policy for fine grained authroization of your application via istio.
+This project creates a standalone authorization server that uses Keycloaks authorization services for fine grained authroization through Istios CUSTOM action for Authorization Policies. It is deployed as a standalone service in kubernetes.
 
 **NOTE!** This is work in progress and have some thing that needs to be done and quirks to solve before it is production ready. But it is fully functional for experimental use for now.
 
