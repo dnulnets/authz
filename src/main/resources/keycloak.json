@@ -1,0 +1,8 @@
+{
+    "realm": "quarkus",
+    "auth-server-url" : "https://keycloak.home/auth",
+    "resource" : "simple",
+    "credentials": {
+      "secret": "aEVDBY5V2BB81SqeOTdfiwre2WyKrvd4"
+    }
+  }
