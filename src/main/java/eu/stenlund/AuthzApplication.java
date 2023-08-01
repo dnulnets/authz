@@ -45,8 +45,7 @@ public class AuthzApplication {
                 resourceClient = authzClient.protection().resource();
         } catch (FileNotFoundException fe) {
             log.error ("AUTHZ: Cannot locate keycloak configuration file: " + keycloakConfigFile);
-        } catch (RuntimeException re)
-        {
+        } catch (RuntimeException re) {
             log.error ("AUTHZ: " + re.getLocalizedMessage());
         }
     }
@@ -56,6 +55,19 @@ public class AuthzApplication {
         log.info ("AUTHZ: Destroying the application");
     }
 
+    /* We are alive and healthy */
+    public Boolean live()
+    {
+       return (authzClient != null) && (resourceClient != null);
+    }
+
+    /* We are ready the receive requests from istio */
+    public Boolean ready ()
+    {
+        return (authzClient != null) && (resourceClient != null);
+    }
+
+    /* Check the authroization with keycloak based on the token, uri and scope */
     public Optional<AuthorizationResponse> authorize (String jwt, String uri, String scope)
     {
         Optional<AuthorizationResponse> ar = Optional.empty();
