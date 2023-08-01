@@ -1,5 +1,5 @@
-# Istio external authorization using keycloak
-This project creates a standalone authorization server that uses Keycloaks authorization services for fine grained authorization through istios CUSTOM action for authorization policies. It is deployed as a standalone service in kubernetes.
+# Istio external provider for authorization using keycloak
+This project creates a standalone external authorization provider. It uses Keycloaks authorization services for fine grained authorization through istios CUSTOM action for authorization policies. It is deployed as a standalone service in kubernetes.
 
 **NOTE!** This is work in progress and have some thing that needs to be done and quirks to solve before it is production ready. But it is fully functional for experimental use for now.
 
@@ -22,7 +22,34 @@ The following versions are the one used for development and testing, it might wo
 * Performance tuning and deployment scenarios.
 
 ### Setup in kubernetes
-#### External authorization provider
+You have to add the external provider to the configmap for istio.
+```
+kubectl edit configmap istio -n istio-system
+```
+Add the extensionprovider and save the config. 
+```
+data:
+  mesh: |-
+    defaultConfig:
+      discoveryAddress: istiod.istio-system.svc:15012
+      proxyMetadata: {}
+      tracing:
+        zipkin:
+          address: zipkin.istio-system:9411
+    enablePrometheusMerge: true
+    rootNamespace: istio-system
+    trustDomain: cluster.local
+    **extensionProviders:
+    - name: "simple-ext-authz-http"
+      envoyExtAuthzHttp:
+        service: "authz.simple.svc.cluster.local"
+        port: "8080"**
+  meshNetworks: 'networks: {}'
+kind: ConfigMap
+```
+
+#### External extension provider
+Istio has to be configured with the extension provider to be able to use it as a CUSTOM action.
 
 #### Example AuthorizationPolicy
 This example shows how to use an authorization policy using a CUSTOM action and specifies which provider to use for authorization. The provider has to be set up in advance. See previous chapter.
