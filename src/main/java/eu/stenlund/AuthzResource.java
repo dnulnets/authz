@@ -103,7 +103,10 @@ public class AuthzResource {
                 AuthorizationResponse response = authzClient.authorization(jwt).authorize(request);
                 String rpt = response.getToken();
                 System.out.println("AUTHZ: You got an RPT = " + rpt);
-                rr = ResponseBuilder.ok("").header("Authorization", "Bearer " + jwt).build();
+                rr = ResponseBuilder.ok("").
+                    header("authorization", "Bearer " + rpt).
+                    header ("x-authz-rpt", "Bearer " + rpt).
+                    build();
 
             } catch (AuthorizationDeniedException ade) {
                 log.info ("AUTHZ: ADE " + ade.getMessage());

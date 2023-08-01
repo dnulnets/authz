@@ -22,11 +22,14 @@ The following versions are the one used for development and testing, it might wo
 * Performance tuning and deployment scenarios.
 
 ### Setup in kubernetes
-You have to add the external provider to the configmap for istio.
+
+#### External extension provider
+Istio has to be configured with the extension provider to be able to use it as a CUSTOM action.
+
 ```
 kubectl edit configmap istio -n istio-system
 ```
-Add the extensionprovider and save the config. 
+Add the extensionprovider as shown below and include the authorization header in the check and rewrite it on OK from the provider (it contains the RPT) .If you do not want it to rewrite the authorisation header for the upstream remove it from the array below. The RPT is also sent by the provider in the x-authz-rpt header that you can forward. Save the config. 
 ```
 data:
   mesh: |-
@@ -39,17 +42,15 @@ data:
     enablePrometheusMerge: true
     rootNamespace: istio-system
     trustDomain: cluster.local
-    **extensionProviders:
+    extensionProviders:
     - name: "simple-ext-authz-http"
       envoyExtAuthzHttp:
         service: "authz.simple.svc.cluster.local"
-        port: "8080"**
+        port: "8080"
+        includeHeadersInCheck: ["authorization"]
+        headersToUpstreamOnAllow: ["authorization", "x-authz-rpt"] # headers sent to backend application when request is allowed.
   meshNetworks: 'networks: {}'
-kind: ConfigMap
 ```
-
-#### External extension provider
-Istio has to be configured with the extension provider to be able to use it as a CUSTOM action.
 
 #### Example AuthorizationPolicy
 This example shows how to use an authorization policy using a CUSTOM action and specifies which provider to use for authorization. The provider has to be set up in advance. See previous chapter.
