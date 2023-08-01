@@ -1,10 +1,10 @@
 # Istio external authorization for Keycloak
-This project creates a standalone authorization server that uses Keycloaks authorization services for fine grained authroization through Istios CUSTOM action for Authorization Policies. It is deployed as a standalone service in kubernetes.
+This project creates a standalone authorization server that uses Keycloaks authorization services for fine grained authorization through Istios CUSTOM action for Authorization Policies. It is deployed as a standalone service in kubernetes.
 
 **NOTE!** This is work in progress and have some thing that needs to be done and quirks to solve before it is production ready. But it is fully functional for experimental use for now.
 
 ## Introduction
-The functional idea is that it is used by istios authorization policy as a CUSTOM action. For each HTTP request it uses the uri to look upp the resource in keycloak. Then it queries keycloak for authorization using the resource and the HTTP method as scope. Based on the response from keycloak it responds to istio with either OK and the RPT or a FORBIDDEN.
+The functional idea is that it is used by istios authorization policy as a CUSTOM action. For each HTTP request it uses the uri to look upp the resource in keycloak. Then it queries keycloak for authorization using the incoming token (**Authorization: Bearer xxxx** header), the looked up resource and the HTTP method as scope. Based on the response from keycloak it responds to istio with either OK and the RPT or a FORBIDDEN.
 
 It runs as a stateless pod (Deployment) and can be run in multiple instances to achieve performance and robustness. But of course adds response time to the protected resource.
 
