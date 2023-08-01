@@ -4,9 +4,9 @@ This project creates a standalone external authorization provider (envoyExtAuthz
 **NOTE!** This is work in progress and have some thing that needs to be done and quirks to solve before it is production ready. But it is fully functional for experimental use for now.
 
 ## Introduction
-The functional idea is that it is used by istios authorization policy as a CUSTOM action and acts as a private keycloak client. For each HTTP request it uses the uri to look upp the resource in keycloak. Then it queries keycloak for authorization using the incoming token (**Authorization: Bearer xxxx** header), the looked up resource and the HTTP method as scope. Based on the response from keycloak it responds to istio with either OK and the RPT in the authorization and the x-authz-rpt header, or with a FORBIDDEN if keycloak denies it.
+The functional idea is that it is used by istios authorization policy as a CUSTOM action and acts as a private keycloak client. For each HTTP request it uses the uri to look upp the resource in keycloak. Then it queries keycloak for authorization using the incoming token (**Authorization: Bearer xxxx** header), the looked up resource and the HTTP method as scope. Based on the response from keycloak it responds to istio with either OK and the RPT in the authorization and the x-authz-rpt headers, or with a FORBIDDEN if keycloak denies it.
 
-It runs as a stateless pod (Deployment) and can be run in multiple instances to achieve performance and robustness. But of course adds response time to the protected resource.
+It runs as a stateless pod (Deployment) and can be run in multiple instances to achieve performance and robustness.
 
 ### Versions
 The following versions are used for development and testing, it might work perfectly fine with other versions as well but it has not been tested.
@@ -14,15 +14,13 @@ The following versions are used for development and testing, it might work perfe
 * Istio 1.17.2
 * Quarkus 3.2.0
 
-### Things to do
-* Caching of resource/URI mapping instead of asking Keycloak for every request.
-* Error handling when a request fails for reasons such as Keycloak not respondning/down, not authorized JWT etc.
-* Health endpoints for the server to be used by kubernetes.
-* This README with examples for setup etc.
+### Things to look into
+* Caching of uri-to-resource mapping instead of asking Keycloak for every request.
+* Better error handling when a request fails for reasons such as Keycloak not respondning/down, not authorized JWT etc.
 * Performance tuning and deployment scenarios.
 * gRPC support.
 
-## Setup in kubernetes
+## Setup for kubernetes
 
 ### External extension provider
 Istio has to be configured with the extension provider to be able to use it as a CUSTOM action.
@@ -54,7 +52,7 @@ data:
 ```
 
 ### Example AuthorizationPolicy
-This example shows how to use an authorization policy using a CUSTOM action and specifies which provider to use for authorization. The provider has to be set up in advance. See previous chapter.
+This example shows how to use an authorization policy for the app **simple** using a CUSTOM action that specifies the previous added extension provider to use for authorization. The provider has to be set up in advance. See previous chapter.
 ```
 apiVersion: security.istio.io/v1
 kind: AuthorizationPolicy
@@ -74,8 +72,8 @@ spec:
 ```
 
 ## Setup for the provider
-The provider is stateless and can be setup with a straightforward deployment and its health endpoints. A service must also be registered to
-be used for the configuration of the extension provider. You need to provide an application.properties for configuration and a keycloak.json to connect to the realm for the client. If you are using SSL to connecto to the keycloak endpoint you also need to add a truststore.
+The provider is stateless and can be setup with a straightforward deployment. A service must also be registered to
+be used for the configuration of the extension provider. You need to provide an application.properties for configuration and a keycloak.json to connect to the realm for the client. If you are using SSL to connecto to the keycloak endpoint you also need to add a truststore. The liveness probe is needed for kubernetes to restart a failed pod and readiness to tell kubernetes that it is accepting requests.
 ```
 apiVersion: v1
 kind: Service
@@ -174,8 +172,12 @@ Example keycloak.json.
   }
 ```
 ## Setup in keycloak
-
+TBD!
 ## How to build it
 
-### Building docker image
+### Building the docker image
+It is published on docker hub as dnulnets/authz, but if you want to build it on your own it can be done with the following command.
+
+```
 quarkus build -Dquarkus.container-image.build=true
+```
