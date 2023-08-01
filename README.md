@@ -6,11 +6,9 @@ This project creates a standalone external authorization provider (envoyExtAuthz
 ## Introduction
 The functional idea is that it is used by istios authorization policy as a CUSTOM action and acts as a private keycloak client. For each HTTP request it uses the uri to look upp the resource in keycloak. Then it queries keycloak for authorization using the incoming token (**Authorization: Bearer xxxx** header), the looked up resource and the HTTP method as scope. Based on the response from keycloak it responds to istio with either OK and the RPT in the authorization and the x-authz-rpt headers, or with a FORBIDDEN if keycloak denies it.
 
-It runs as a stateless pod (Deployment) and can be run in multiple instances to achieve performance and robustness.
-
-### Versions
-The following versions are used for development and testing, it might work perfectly fine with other versions as well but it has not been tested.
-* Keycloak 21.1.1
+### Runtime and development versions
+The following versions are used for runtime, development and testing. It might work perfectly fine with other versions as well but it has not been verified.
+* Keycloak 21.1.1 (keycloak-authz-client, keycloak-core)
 * Istio 1.17.2
 * Quarkus 3.2.0
 
@@ -20,7 +18,7 @@ The following versions are used for development and testing, it might work perfe
 * Performance tuning and deployment scenarios.
 * gRPC support.
 
-## Setup for kubernetes
+## Kubernetes setup
 
 ### External extension provider
 Istio has to be configured with the extension provider to be able to use it as a CUSTOM action.
