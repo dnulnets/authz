@@ -9,7 +9,7 @@ The functional idea is that it is used by istios authorization policy as a CUSTO
 It runs as a stateless pod (Deployment) and can be run in multiple instances to achieve performance and robustness. But of course adds response time to the protected resource.
 
 ### Versions
-The following versions are the one used for development and testing, it might work perfectly fine with other versions as well but it has not been tested.
+The following versions are used for development and testing, it might work perfectly fine with other versions as well but it has not been tested.
 * Keycloak 21.1.1
 * Istio 1.17.2
 * Quarkus 3.2.0
@@ -49,7 +49,7 @@ data:
         service: "authz.simple.svc.cluster.local"
         port: "8080"
         includeHeadersInCheck: ["authorization"]
-        headersToUpstreamOnAllow: ["authorization", "x-authz-rpt"] # headers sent to backend application when request is allowed.
+        headersToUpstreamOnAllow: ["authorization", "x-authz-rpt"]
   meshNetworks: 'networks: {}'
 ```
 

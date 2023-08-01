@@ -4,6 +4,7 @@ import jakarta.ws.rs.GET;
 import jakarta.ws.rs.OPTIONS;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.PUT;
+import jakarta.inject.Inject;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.PATCH;
 import jakarta.ws.rs.HEAD;
@@ -15,20 +16,11 @@ import jakarta.ws.rs.core.UriInfo;
 import org.jboss.resteasy.reactive.RestResponse;
 import org.jboss.resteasy.reactive.RestResponse.ResponseBuilder;
 import org.jboss.resteasy.reactive.RestResponse.Status;
-import org.eclipse.microprofile.config.ConfigProvider;
 import org.jboss.logging.Logger;
 import org.jboss.resteasy.reactive.RestHeader;
-import org.keycloak.authorization.client.AuthorizationDeniedException;
-import org.keycloak.authorization.client.AuthzClient;
-import org.keycloak.authorization.client.resource.ProtectedResource;
-import org.keycloak.representations.idm.authorization.AuthorizationRequest;
 import org.keycloak.representations.idm.authorization.AuthorizationResponse;
-import org.keycloak.representations.idm.authorization.ResourceRepresentation;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
-import java.util.List;
+import java.util.Optional;
 
 @Path("/")
 public class AuthzResource {
@@ -36,27 +28,8 @@ public class AuthzResource {
     /** Logger */
     private static final Logger log = Logger.getLogger(AuthzResource.class);
 
-    /* The keycloak authorization clients */
-    private AuthzClient authzClient = null;
-    private ProtectedResource resourceClient = null;
-
-    public AuthzResource() {
-
-        String keycloak = ConfigProvider.getConfig().getValue("authz.keycloak", String.class);
-        
-        /* Create the clients */
-        try {
-            InputStream input = new FileInputStream(keycloak);
-            authzClient = AuthzClient.create (input);
-            if (authzClient != null)
-                resourceClient = authzClient.protection().resource();
-        } catch (FileNotFoundException fe) {
-            log.error ("AUTHZ: Cannot locate keycloak configuration file: " + keycloak);
-        } catch (RuntimeException re)
-        {
-            log.error ("AUTHZ: " + re.getLocalizedMessage());
-        }
-    }
+    /* Get the application */
+    @Inject AuthzApplication appl;
 
     /* Take out the JWT from the Bearer, if any */
     private String getJWT (String bearer)
@@ -77,44 +50,14 @@ public class AuthzResource {
     private RestResponse<String> performAuthzCheck (String jwt, String uri, String scope)
     {
         RestResponse<String> rr = ResponseBuilder.create(Status.FORBIDDEN, "Default deny").build();
-
-        /* Only possible if we got access to keycloak, if not deny all */
-        if (authzClient != null && resourceClient != null) {
-
-            // The resource lookup and the authorize request can cause exceptions and
-            // when they occur we will deny all by default.
-            try {
-
-                // Get the resources associated with the URI
-                log.info ("Getting resources for URI="+ uri);
-                List<ResourceRepresentation> lrr = resourceClient.findByUri (uri);
-                log.info ("Length of resourcelist = " + lrr.size());
-                lrr.forEach((n) -> log.info("Resource = " + n.getName()));
-
-                // Create an authorization request containing all the resources and thescope
-                log.info ("Checking authorization");
-                AuthorizationRequest request = new AuthorizationRequest();
-                lrr.forEach((n) -> {
-                    log.info ("Adding " + n.getName() + " and scope " + scope);
-                    request.addPermission(n.getName(), scope); 
-                });
-
-                // Try to get us authorized
-                AuthorizationResponse response = authzClient.authorization(jwt).authorize(request);
-                String rpt = response.getToken();
-                System.out.println("AUTHZ: You got an RPT = " + rpt);
+        Optional<AuthorizationResponse> ar = appl.authorize(jwt, uri, scope);
+        if (ar.isPresent()) {
+                String rpt = ar.get().getToken();
+                System.out.println("AUTHZ: RPT = " + rpt);
                 rr = ResponseBuilder.ok("").
                     header("authorization", "Bearer " + rpt).
                     header ("x-authz-rpt", "Bearer " + rpt).
                     build();
-
-            } catch (AuthorizationDeniedException ade) {
-                log.info ("AUTHZ: ADE " + ade.getMessage());
-                rr = ResponseBuilder.create(Status.FORBIDDEN, ade.getMessage()).build();
-            } catch (RuntimeException ade) {
-                log.info ("AUTHZ: RE " + ade.getMessage());
-                rr = ResponseBuilder.create(Status.FORBIDDEN, ade.getMessage()).build();
-            }
         }
 
         return rr;
