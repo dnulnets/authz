@@ -74,7 +74,105 @@ spec:
 ```
 
 ## Setup for the provider
-
+The provider is stateless and can be setup with a straightforward deployment and its health endpoints. A service must also be registered to
+be used for the configuration of the extension provider. You need to provide an application.properties for configuration and a keycloak.json to connect to the realm for the client. If you are using SSL to connecto to the keycloak endpoint you also need to add a truststore.
+```
+apiVersion: v1
+kind: Service
+metadata:
+  name: authz
+  namespace: authz
+  labels:
+    app: authz
+spec:
+  ports:
+  - name: http
+    port: 8080
+    targetPort: 8080
+  selector:
+    app: authz
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: authz
+  namespace: authz
+spec:  
+  replicas: 1
+  selector:
+    matchLabels:
+      app: authz
+  template:
+    metadata:
+      labels:
+        app: authz
+        version: 0.0.56
+    spec:
+      containers:
+      - image: dnulnets/authz:0.0.56
+        imagePullPolicy: IfNotPresent
+        name: authz
+        env:
+          - name: QUARKUS_LOG_LEVEL
+            value: "INFO"
+          - name: JAVA_OPTS_APPEND
+            value: " -Djavax.net.ssl.trustStore=/cert/stenlund.jks -Djavax.net.ssl.trustStorePassword=changeme"
+        ports:
+        - containerPort: 8080
+        livenessProbe:
+          httpGet:
+            path: /q/health/live
+            port: 8080
+          initialDelaySeconds: 10
+          timeoutSeconds: 1
+        readinessProbe:
+          httpGet:
+            path: /q/health/ready
+            port: 8080
+          initialDelaySeconds: 15 
+          timeoutSeconds: 1
+        volumeMounts:
+        - mountPath: /cert/stenlund.jks
+          name: stenlund
+          subPath: stenlund.jks
+          readOnly: true
+        - mountPath: /deployments/config/application.properties
+          name: stenlund
+          subPath: application.properties
+          readOnly: true
+        - mountPath: /deployments/config/keycloak.json
+          name: stenlund
+          subPath: keycloak.json
+          readOnly: true
+      volumes:
+      - name: stenlund
+        configMap: 
+          name: stenlund
+          items:
+            - key: stenlund.jks
+              path: stenlund.jks
+            - key: keycloak.json
+              path: keycloak.json
+            - key: application.properties
+              path: application.properties
+```
+Example application.properties.
+```
+quarkus.http.cors=true
+quarkus.http.cors.origins=/.*/
+authz.keycloak=/deployments/config/keycloak.json
+```
+Example keycloak.json.
+```
+{
+    "realm": "quarkus",
+    "auth-server-url" : "https://keycloak.home/auth",
+    "resource" : "simple",
+    "credentials": {
+      "secret": "my_own_little_secret"
+    }
+  }
+```
 ## Setup in keycloak
 
 ## How to build it
