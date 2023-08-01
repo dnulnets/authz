@@ -9,6 +9,7 @@ import jakarta.ws.rs.PATCH;
 import jakarta.ws.rs.HEAD;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.UriInfo;
 
 import org.jboss.resteasy.reactive.RestResponse;
@@ -127,7 +128,10 @@ public class AuthzResource {
     /* GET => Scope = GET */
     @Path("{:.+}")
     @GET
-    public RestResponse<String> getCheck(@RestHeader("Authorization") String bearer, @Context UriInfo uriInfo) {
+    public RestResponse<String> getCheck(HttpHeaders httpHeaders, @RestHeader("Authorization") String bearer, @Context UriInfo uriInfo) {
+        httpHeaders.getRequestHeaders().forEach((h,v)->{
+            log.info ("SIMPLE: " + h + " = " + v);
+        });
         log.info ("Authorization check for URI = " + uriInfo.getPath() + " and scope = GET");
         return performAuthzCheck (getJWT (bearer), uriInfo.getPath(), "GET");
     }
