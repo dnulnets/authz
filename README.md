@@ -1,10 +1,10 @@
-# Istio external authorization for Keycloak
-This project creates a standalone authorization server that uses Keycloaks authorization services for fine grained authorization through Istios CUSTOM action for Authorization Policies. It is deployed as a standalone service in kubernetes.
+# Istio external authorization using keycloak
+This project creates a standalone authorization server that uses Keycloaks authorization services for fine grained authorization through istios CUSTOM action for authorization policies. It is deployed as a standalone service in kubernetes.
 
 **NOTE!** This is work in progress and have some thing that needs to be done and quirks to solve before it is production ready. But it is fully functional for experimental use for now.
 
 ## Introduction
-The functional idea is that it is used by istios authorization policy as a CUSTOM action. For each HTTP request it uses the uri to look upp the resource in keycloak. Then it queries keycloak for authorization using the incoming token (**Authorization: Bearer xxxx** header), the looked up resource and the HTTP method as scope. Based on the response from keycloak it responds to istio with either OK and the RPT or a FORBIDDEN.
+The functional idea is that it is used by istios authorization policy as a CUSTOM action and acts as a private keycloak client. For each HTTP request it uses the uri to look upp the resource in keycloak. Then it queries keycloak for authorization using the incoming token (**Authorization: Bearer xxxx** header), the looked up resource and the HTTP method as scope. Based on the response from keycloak it responds to istio with either OK and the RPT or a FORBIDDEN.
 
 It runs as a stateless pod (Deployment) and can be run in multiple instances to achieve performance and robustness. But of course adds response time to the protected resource.
 
@@ -22,8 +22,10 @@ The following versions are the one used for development and testing, it might wo
 * Performance tuning and deployment scenarios.
 
 ### Setup in kubernetes
-#### Example AuthroizationPolicy
-This example shows how to use an authorization policy using a CUSTOM action and specifies which provider to use for authroization.
+#### External authorization provider
+
+#### Example AuthorizationPolicy
+This example shows how to use an authorization policy using a CUSTOM action and specifies which provider to use for authorization. The provider has to be set up in advance. See previous chapter.
 ```
 apiVersion: security.istio.io/v1
 kind: AuthorizationPolicy
