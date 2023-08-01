@@ -8,18 +8,19 @@ The functional idea is that it is used by istios authorization policy as a CUSTO
 
 It runs as a stateless pod (Deployment) and can be run in multiple instances to achieve performance and robustness. But of course adds response time to the protected resource.
 
-## Versions
+### Versions
 The following versions are the one used for development and testing, it might work perfectly fine with other versions as well but it has not been tested.
 * Keycloak 21.1.1
 * Istio 1.17.2
 * Quarkus 3.2.0
 
-## Things to do
+### Things to do
 * Caching of resource/URI mapping instead of asking Keycloak for every request.
 * Error handling when a request fails for reasons such as Keycloak not respondning/down, not authorized JWT etc.
 * Health endpoints for the server to be used by kubernetes.
 * This README with examples for setup etc.
 * Performance tuning and deployment scenarios.
+* gRPC support.
 
 ## Setup in kubernetes
 
@@ -71,6 +72,8 @@ spec:
     - operation:
         paths: ["*"]
 ```
+
+## Setup for the provider
 
 ## Setup in keycloak
 
