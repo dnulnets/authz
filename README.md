@@ -71,7 +71,7 @@ spec:
 
 ## Setup for the provider
 The provider is stateless and can be setup with a straightforward deployment. A service must also be registered to
-be used for the configuration of the extension provider. You need to provide an application.properties for configuration and a keycloak.json to connect to the realm for the client. If you are using SSL to connecto to the keycloak endpoint you also need to add a truststore. The liveness probe is needed for kubernetes to restart a failed pod and readiness to tell kubernetes that it is accepting requests.
+be used for the configuration of the extension provider. You need to provide an application.properties for configuration. If you are using SSL to connecto to the keycloak endpoint you also need to add a truststore. The liveness probe is needed for kubernetes to restart a failed pod and the readiness probe to tell kubernetes that it is accepting requests.
 ```
 apiVersion: v1
 kind: Service
@@ -136,10 +136,6 @@ spec:
           name: stenlund
           subPath: application.properties
           readOnly: true
-        - mountPath: /deployments/config/keycloak.json
-          name: stenlund
-          subPath: keycloak.json
-          readOnly: true
       volumes:
       - name: stenlund
         configMap: 
@@ -147,28 +143,17 @@ spec:
           items:
             - key: stenlund.jks
               path: stenlund.jks
-            - key: keycloak.json
-              path: keycloak.json
             - key: application.properties
               path: application.properties
 ```
 Example application.properties.
 ```
-quarkus.http.cors=true
-quarkus.http.cors.origins=/.*/
-authz.keycloak=/deployments/config/keycloak.json
+authz.keycloak.server=https://keycloak.home/auth
+authz.keycloak.realm=quarkus
+authz.keycloak.client=simple
+authz.keycloak.secret=changeme
 ```
-Example keycloak.json.
-```
-{
-    "realm": "quarkus",
-    "auth-server-url" : "https://keycloak.home/auth",
-    "resource" : "simple",
-    "credentials": {
-      "secret": "my_own_little_secret"
-    }
-  }
-```
+
 ## Setup in keycloak
 TBD!
 ## How to build it

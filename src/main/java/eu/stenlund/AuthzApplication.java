@@ -4,12 +4,14 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.logging.Logger;
 import org.keycloak.authorization.client.AuthorizationDeniedException;
 import org.keycloak.authorization.client.AuthzClient;
+import org.keycloak.authorization.client.Configuration;
 import org.keycloak.authorization.client.resource.ProtectedResource;
 import org.keycloak.representations.idm.authorization.AuthorizationRequest;
 import org.keycloak.representations.idm.authorization.AuthorizationResponse;
@@ -29,8 +31,11 @@ public class AuthzApplication {
     /* Logger */
     private static final Logger log = Logger.getLogger(AuthzApplication.class);
 
-    /* Configuration that points out the keycloak.json file */
-    @ConfigProperty(name = "authz.keycloak") String keycloakConfigFile;
+    /* Configuration that points out the keycloak server, realm and client */
+    @ConfigProperty(name = "authz.keycloak.server") String kcServer;
+    @ConfigProperty(name = "authz.keycloak.realm") String kcRealm;
+    @ConfigProperty(name = "authz.keycloak.client") String kcClient;
+    @ConfigProperty(name = "authz.keycloak.secret") String kcSecret;
 
     /* The keycloak authorization clients */
     private AuthzClient authzClient = null;
@@ -45,12 +50,10 @@ public class AuthzApplication {
 
         /* Create the clients */
         try {
-            InputStream input = new FileInputStream(keycloakConfigFile);
-            authzClient = AuthzClient.create (input);
+            Configuration cfg = new Configuration(kcServer, kcRealm, kcClient, Map.of ("secret", kcSecret), null);
+            authzClient = AuthzClient.create (cfg);
             if (authzClient != null)
                 resourceClient = authzClient.protection().resource();
-        } catch (FileNotFoundException fe) {
-            log.error ("AUTHZ: Cannot locate keycloak configuration file: " + keycloakConfigFile);
         } catch (RuntimeException re) {
             log.error ("AUTHZ: " + re.getLocalizedMessage());
         }
