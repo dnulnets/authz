@@ -19,10 +19,14 @@ import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import jakarta.enterprise.context.ApplicationScoped;
 
+/**
+ * Contains the generic functionality for the extension provider. Such as connectivity to keycloak
+ * regarding authroization and resource mapping.
+ */
 @ApplicationScoped
 public class AuthzApplication {
 
-    /** Logger */
+    /* Logger */
     private static final Logger log = Logger.getLogger(AuthzApplication.class);
 
     /* Configuration that points out the keycloak.json file */
@@ -30,9 +34,11 @@ public class AuthzApplication {
 
     /* The keycloak authorization clients */
     private AuthzClient authzClient = null;
+
+    /* The keycloak resource client */
     private ProtectedResource resourceClient = null;
     
-    /* Set up the application */
+    /* Initialize the application */
     @PostConstruct 
     void init() {
         log.info ("AUTHZ: Initializing the application");
@@ -50,6 +56,7 @@ public class AuthzApplication {
         }
     }
 
+    /* Destroys the application */
     @PreDestroy 
     void destroy() {
         log.info ("AUTHZ: Destroying the application");
@@ -61,19 +68,26 @@ public class AuthzApplication {
        return (authzClient != null) && (resourceClient != null);
     }
 
-    /* We are ready the receive requests from istio */
+    /* We are ready to receive requests from istio */
     public Boolean ready ()
     {
+        /* In the future we might need to wait for the resource caching has finished first */
         return (authzClient != null) && (resourceClient != null);
     }
 
-    /* Check the authroization with keycloak based on the token, uri and scope */
+    /**
+     * Check the authorization with keycloak based on the token, uri and scope.
+     * 
+     * @param   jwt     The token to be used during authroization.
+     * @param   uri     The uri that points to the resource that is protected.
+     * @param   scope   The wanted scope for the resource.
+     * @return          The authorization response if we are authroized.
+     */
     public Optional<AuthorizationResponse> authorize (String jwt, String uri, String scope)
     {
         Optional<AuthorizationResponse> ar = Optional.empty();
 
-        // The resource lookup and the authorize request can cause exceptions and
-        // when they occur we will deny all by default.
+        /* Are we connected */
         if (authzClient != null && resourceClient != null) {
 
             try {

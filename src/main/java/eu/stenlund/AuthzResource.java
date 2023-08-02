@@ -22,6 +22,9 @@ import org.keycloak.representations.idm.authorization.AuthorizationResponse;
 
 import java.util.Optional;
 
+/**
+ * Handles all incoming requests that are supposed to be checked by keycloak authorization service.
+ */
 @Path("/")
 public class AuthzResource {
 
@@ -31,7 +34,11 @@ public class AuthzResource {
     /* Get the application */
     @Inject AuthzApplication appl;
 
-    /* Take out the JWT from the Bearer, if any */
+    /**
+     * Extract the the JWT from the Bearer.
+     * @param   bearer  The value of the authroization header.
+     * @return          The extracted token.
+     */
     private String getJWT (String bearer)
     {
         String jwt = "";
@@ -46,7 +53,13 @@ public class AuthzResource {
         return jwt;
     }
 
-    /* Perform the authorization check */
+    /**
+     * Performs the authorization check.
+     * @param   jwt     The token sent by the requestor.
+     * @param   uri     The uri the requestor is trying to access
+     * @param   scope   The scope the requestor asks for
+     * @return          The response sent back to the authorization requestor (istio).
+     */
     private RestResponse<String> performAuthzCheck (String jwt, String uri, String scope)
     {
         RestResponse<String> rr = ResponseBuilder.create(Status.FORBIDDEN, "Default deny").build();

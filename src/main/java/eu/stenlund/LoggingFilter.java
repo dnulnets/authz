@@ -10,6 +10,9 @@ import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.UriInfo;
 import jakarta.ws.rs.ext.Provider;
 
+/**
+ * The logger for incoming requests.
+ */
 @Provider
 @PreMatching 
 public class LoggingFilter implements ContainerRequestFilter {

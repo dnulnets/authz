@@ -26,7 +26,7 @@ Istio has to be configured with the extension provider to be able to use it as a
 ```
 kubectl edit configmap istio -n istio-system
 ```
-Add the extensionprovider as shown below and include the authorization header in the check and rewrite it on OK from the provider (it contains the RPT) .If you do not want it to rewrite the authorisation header for the upstream remove it from the array below. The RPT is also sent by the provider in the x-authz-rpt header that you can forward. Save the config. 
+Add the extension provider as shown below and include the authorization header in the check and rewrite it on OK from the provider (it contains the RPT) .If you do not want it to rewrite the authorisation header for the upstream remove it from the array below. The RPT is also sent by the provider in the x-authz-rpt header that you can forward. Save the config. 
 ```
 data:
   mesh: |-
