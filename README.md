@@ -157,8 +157,8 @@ quarkus.http.cors.origins=/.*/
 ```
 
 ## Setup in keycloak
-You need to create a confidential client (**Client authentication. ON**) in your realm and enable fine grained
-authorization (**Authentication: ON**) for the client. You will then get a "Authorization" tab in the configuration
+You need to create a confidential client (**Client authentication: ON**) in your realm and enable fine grained
+authorization (**Authentication: ON**) for the client. You will then get an "Authorization" tab in the configuration
 pages for the client. You need to add the following scopes: GET,POST,PUT,DELETE and PATCH. Then you can start adding your
 protected resources, make sure the URI matches the URI of the requests you want to protect. Then you have to decide which policies and permissions to add to fit your application needs.
 
