@@ -4,7 +4,7 @@ This project creates a standalone external authorization provider (envoyExtAuthz
 **NOTE!** This is work in progress and have some thing that needs to be done and quirks to solve before it is production ready. But it is fully functional for experimental use for now.
 
 ## Introduction
-The functional idea is that it is used by istios authorization policy as a CUSTOM action and acts as a private keycloak client. For each HTTP request it uses the uri to look upp the resource in keycloak. Then it queries keycloak for authorization using the incoming token (**Authorization: Bearer xxxx** header), the looked up resource and the HTTP method as scope. Based on the response from keycloak it responds to istio with either OK and the RPT in the authorization and the x-authz-rpt headers, or with a FORBIDDEN if keycloak denies it.
+The functional idea is that it is used by istios authorization policy as a CUSTOM action and acts as a private keycloak client. For each HTTP request it uses the uri to look upp the resource in keycloak. Then it queries keycloak for authorization using the incoming token (**Authorization: Bearer xxxx** header), the looked up resource and the HTTP method as scope. Based on the response from keycloak it responds to istio with either OK and the RPT in the authorization and x-authz-rpt headers, or with a FORBIDDEN if keycloak denies it.
 
 ### Runtime and development versions
 The following versions are used for runtime, development and testing. It might work perfectly fine with other versions as well but it has not been verified.
@@ -69,7 +69,7 @@ spec:
         paths: ["*"]
 ```
 
-## Setup for the provider
+## Deployment of the extension provider
 The provider is stateless and can be setup with a straightforward deployment. A service must also be registered to
 be used for the configuration of the extension provider. You need to provide an application.properties for configuration. If you are using SSL to connecto to the keycloak endpoint you also need to add a truststore. The liveness probe is needed for kubernetes to restart a failed pod and the readiness probe to tell kubernetes that it is accepting requests.
 ```
