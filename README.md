@@ -50,7 +50,7 @@ data:
 ```
 
 ### Example AuthorizationPolicy
-This example shows how to use an authorization policy for the app **simple** using a CUSTOM action that specifies the previous added extension provider to use for authorization. The provider has to be set up in advance. See previous chapter.
+This example shows how to use an authorization policy for the "app" **simple**. You want to protect it using a CUSTOM action that specifies the previous added extension provider to use for authorization. The provider has to be set up in advance. See previous chapter.
 ```
 apiVersion: security.istio.io/v1
 kind: AuthorizationPolicy
