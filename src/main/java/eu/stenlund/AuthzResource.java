@@ -54,7 +54,7 @@ public class AuthzResource {
     }
 
     /**
-     * Performs the authorization check.
+     * Performs the authorization check and creates a response.
      * @param   jwt     The token sent by the requestor.
      * @param   uri     The uri the requestor is trying to access
      * @param   scope   The scope the requestor asks for
@@ -62,15 +62,12 @@ public class AuthzResource {
      */
     private RestResponse<String> performAuthzCheck (String jwt, String uri, String scope)
     {
-        RestResponse<String> rr = ResponseBuilder.create(Status.FORBIDDEN, "Default deny").build();
+        RestResponse<String> rr = ResponseBuilder.create(Status.FORBIDDEN, "").build();
         Optional<AuthorizationResponse> ar = appl.authorize(jwt, uri, scope);
         if (ar.isPresent()) {
                 String rpt = ar.get().getToken();
-                System.out.println("AUTHZ: RPT = " + rpt);
-                rr = ResponseBuilder.ok("").
-                    header("authorization", "Bearer " + rpt).
-                    header ("x-authz-rpt", "Bearer " + rpt).
-                    build();
+                log.info("AUTHZ: Got an RPT = " + rpt);
+                rr = ResponseBuilder.ok("").header("authorization", "Bearer " + rpt).build();
         }
 
         return rr;
@@ -80,7 +77,7 @@ public class AuthzResource {
     @Path("{:.+}")
     @OPTIONS
     public RestResponse<String> optionsCheck(@RestHeader("Authorization") String bearer, @Context UriInfo uriInfo) {
-        log.info ("Authorization check for URI = " + uriInfo.getPath() + " and scope = OPTIONS");
+        log.info ("AUTHZ: Authorization check for URI = " + uriInfo.getPath() + " and scope = OPTIONS");
         return ResponseBuilder.ok("").build();
     }
 
@@ -89,9 +86,9 @@ public class AuthzResource {
     @GET
     public RestResponse<String> getCheck(HttpHeaders httpHeaders, @RestHeader("Authorization") String bearer, @Context UriInfo uriInfo) {
         httpHeaders.getRequestHeaders().forEach((h,v)->{
-            log.info ("SIMPLE: " + h + " = " + v);
+            log.info ("AUTHZ: " + h + " = " + v);
         });
-        log.info ("Authorization check for URI = " + uriInfo.getPath() + " and scope = GET");
+        log.info ("AUTHZ: Authorization check for URI = " + uriInfo.getPath() + " and scope = GET");
         return performAuthzCheck (getJWT (bearer), uriInfo.getPath(), "GET");
     }
 
@@ -99,7 +96,7 @@ public class AuthzResource {
     @Path("{:.+}")
     @HEAD
     public RestResponse<String> headCheck(@RestHeader("Authorization") String bearer, @Context UriInfo uriInfo) {
-        log.info ("Authorization check for URI = " + uriInfo.getPath() + " and scope = HEAD");
+        log.info ("AUTHZ: Authorization check for URI = " + uriInfo.getPath() + " and scope = HEAD");
         return performAuthzCheck (getJWT (bearer), uriInfo.getPath(), "GET");
     }
 
@@ -107,7 +104,7 @@ public class AuthzResource {
     @Path("{:.+}")
     @POST
     public RestResponse<String> postCheck(@RestHeader("Authorization") String bearer, @Context UriInfo uriInfo) {
-        log.info ("Authorization check for URI = " + uriInfo.getPath() + " and scope = POST");
+        log.info ("AUTHZ: Authorization check for URI = " + uriInfo.getPath() + " and scope = POST");
         return performAuthzCheck (getJWT(bearer), uriInfo.getPath(), "POST");
     }
 
@@ -115,7 +112,7 @@ public class AuthzResource {
     @Path("{:.+}")
     @PUT
     public RestResponse<String> putCheck(@RestHeader("Authorization") String bearer, @Context UriInfo uriInfo) {
-        log.info ("Authorization check for URI = " + uriInfo.getPath() + " and scope = PUT");
+        log.info ("AUTHZ: Authorization check for URI = " + uriInfo.getPath() + " and scope = PUT");
         return performAuthzCheck (getJWT(bearer), uriInfo.getPath(), "PUT");
     }
 
@@ -123,7 +120,7 @@ public class AuthzResource {
     @Path("{:.+}")
     @DELETE
     public RestResponse<String> deleteCheck(@RestHeader("Authorization") String bearer, @Context UriInfo uriInfo) {
-        log.info ("Authorization check for URI = " + uriInfo.getPath() + " and scope = DELETE");
+        log.info ("AUTHZ: Authorization check for URI = " + uriInfo.getPath() + " and scope = DELETE");
         return performAuthzCheck (getJWT(bearer), uriInfo.getPath(), "DELETE");
     }
 
@@ -131,7 +128,7 @@ public class AuthzResource {
     @Path("{:.+}")
     @PATCH
     public RestResponse<String> patchCheck(@RestHeader("Authorization") String bearer, @Context UriInfo uriInfo) {
-        log.info ("Authorization check for URI = " + uriInfo.getPath() + " and scope = PATCH");
+        log.info ("AUTHZ: Authorization check for URI = " + uriInfo.getPath() + " and scope = PATCH");
         return performAuthzCheck (getJWT(bearer), uriInfo.getPath(), "PATCH");
     }
 }
