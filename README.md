@@ -1,4 +1,4 @@
-# Istio extension provider for authorization with keycloak
+# Istio extension provider for fine grained authorization with keycloak
 This project creates a standalone external authorization provider (envoyExtAuthzHttp). It uses Keycloaks authorization services for fine grained authorization through istios CUSTOM action for authorization policies. It is deployed as a standalone service in kubernetes.
 
 **NOTE!** This is work in progress and have some thing that needs to be done and quirks to solve before it is production ready. But it is fully functional for experimental use for now.
