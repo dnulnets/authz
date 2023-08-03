@@ -99,7 +99,7 @@ public class AuthzApplication {
                 lrr.forEach((n) -> log.info("AUTHZ: Resource = " + n.getName() + "(" + n.getId() + ")"));
 
                 // Create an authorization request containing all the resources and thescope
-                log.info ("AUTHZ: Checking authorization");
+                log.info ("AUTHZ: Creating authorization check");
                 AuthorizationRequest request = new AuthorizationRequest();
                 lrr.forEach((n) -> {
                     log.info ("AUTHZ: Adding " + n.getId() + " and scope " + scope);
@@ -107,6 +107,7 @@ public class AuthzApplication {
                 });
 
                 // Try to get us authorized
+                log.info ("AUTHZ: Executing authorization check");
                 ar = Optional.of(authzClient.authorization(jwt).authorize(request));
 
             } catch (AuthorizationDeniedException ade) {
