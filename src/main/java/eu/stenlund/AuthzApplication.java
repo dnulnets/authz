@@ -96,14 +96,14 @@ public class AuthzApplication {
                 log.info ("AUTHZ: Getting resources for URI="+ uri);
                 List<ResourceRepresentation> lrr = resourceClient.findByUri (uri);
                 log.info ("AUTHZ: Length of resourcelist = " + lrr.size());
-                lrr.forEach((n) -> log.info("AUTHZ: Resource = " + n.getName()));
+                lrr.forEach((n) -> log.info("AUTHZ: Resource = " + n.getName() + "(" + n.getId() + ")"));
 
                 // Create an authorization request containing all the resources and thescope
                 log.info ("AUTHZ: Checking authorization");
                 AuthorizationRequest request = new AuthorizationRequest();
                 lrr.forEach((n) -> {
-                    log.info ("AUTHZ: Adding " + n.getName() + " and scope " + scope);
-                    request.addPermission(n.getName(), scope); 
+                    log.info ("AUTHZ: Adding " + n.getId() + " and scope " + scope);
+                    request.addPermission(n.getId(), scope); 
                 });
 
                 // Try to get us authorized
