@@ -41,13 +41,17 @@ public class AuthzResource {
      */
     private String getJWT (String bearer)
     {
-        String jwt = "";
+        String jwt = null;
 
         // Get the JWT
         if (bearer != null) {
-            String s = bearer.substring(0, Math.min(bearer.length(), 7));
-            if (s.compareToIgnoreCase("Bearer ") == 0) {
-                jwt = bearer.substring(7).trim();
+            try {
+                String s = bearer.substring(0, Math.min(bearer.length(), 7));
+                if (s.compareToIgnoreCase("Bearer ") == 0) {
+                    jwt = bearer.substring(7).trim();
+                }
+            } catch (IndexOutOfBoundsException iob) {
+                log.error("AUTHZ: Could not extract JWT: " + bearer);
             }
         }
         return jwt;
@@ -62,12 +66,25 @@ public class AuthzResource {
      */
     private RestResponse<String> performAuthzCheck (String jwt, String uri, String scope)
     {
-        RestResponse<String> rr = ResponseBuilder.create(Status.FORBIDDEN, "").build();
+        RestResponse<String> rr = null;
+
         Optional<AuthorizationResponse> ar = appl.authorize(jwt, uri, scope);
         if (ar.isPresent()) {
-                String rpt = ar.get().getToken();
-                log.info("AUTHZ: Got an RPT = " + rpt);
-                rr = ResponseBuilder.ok("").header("authorization", "Bearer " + rpt).build();
+            String rpt = ar.get().getToken();
+            log.info("AUTHZ: Got an RPT = " + rpt);
+            rr = ResponseBuilder.ok("").
+                header("Authorization", "Bearer " + rpt).
+                header("Cache-Control", "private, no-cache, no-store, must-revalidate").
+                header("Expires", "-1").
+                header("Pragma", "no-cache").
+                build();
+        } else {
+            log.info ("AUTHZ: Failed to get an RPT, not authorized");
+            rr = ResponseBuilder.create(Status.FORBIDDEN, "").
+                header("Cache-Control", "private, no-cache, no-store, must-revalidate").
+                header("Expires", "-1").
+                header("Pragma", "no-cache").
+                build();
         }
 
         return rr;
@@ -85,9 +102,6 @@ public class AuthzResource {
     @Path("{:.+}")
     @GET
     public RestResponse<String> getCheck(HttpHeaders httpHeaders, @RestHeader("Authorization") String bearer, @Context UriInfo uriInfo) {
-        httpHeaders.getRequestHeaders().forEach((h,v)->{
-            log.info ("AUTHZ: " + h + " = " + v);
-        });
         log.info ("AUTHZ: Authorization check for URI = " + uriInfo.getPath() + " and scope = GET");
         return performAuthzCheck (getJWT (bearer), uriInfo.getPath(), "GET");
     }

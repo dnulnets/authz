@@ -87,8 +87,8 @@ public class AuthzApplication {
     {
         Optional<AuthorizationResponse> ar = Optional.empty();
 
-        /* Are we connected */
-        if (authzClient != null && resourceClient != null) {
+        /* Are we connected and have a JWT */
+        if (authzClient != null && resourceClient != null && jwt!=null) {
 
             try {
 
