@@ -9,7 +9,7 @@ The functional idea is that it is used by istios authorization policy as a CUSTO
 ### Runtime and development versions
 The following versions are used for runtime, development and testing. It might work perfectly fine with other versions as well but it has not been verified.
 * Keycloak 21.1.1 (keycloak-authz-client, keycloak-core)
-* Istio 1.17.2
+* Istio 1.17.2/1.18.2
 * Quarkus 3.2.0
 
 ### Things to look into
