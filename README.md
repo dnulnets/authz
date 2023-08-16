@@ -4,7 +4,7 @@ This project creates a standalone external authorization provider (envoyExtAuthz
 **NOTE!** This is work in progress and have some thing that needs to be done and quirks to solve before it is production ready. But it is fully functional for experimental use for now.
 
 ## Introduction
-The functional idea is that it is used by istios authorization policy as a CUSTOM action and acts as a private keycloak client. For each HTTP request it uses the uri to look upp the resource in keycloak. Then it queries keycloak for authorization using the incoming token (**Authorization: Bearer xxxx** header), the looked up resource and the HTTP method as scope. Based on the response from keycloak it responds to istio with either OK and the RPT in the authorization headers, or with a FORBIDDEN if keycloak denies it.
+The functional idea is that it is used by istios authorization policy as a CUSTOM action and acts as a confidential keycloak client. For each HTTP request it uses the uri to look upp the resource in keycloak. Then it queries keycloak for authorization using the incoming token (**Authorization: Bearer xxxx** header), the looked up resource and the HTTP method as scope. Based on the response from keycloak it responds to istio with either OK and the RPT in the authorization headers, or with a FORBIDDEN if keycloak denies it.
 
 ### Runtime and development versions
 The following versions are used for runtime, development and testing. It might work perfectly fine with other versions as well but it has not been verified.
